@@ -1,0 +1,155 @@
+{
+  "task": "Day-ahead hourly wind generation forecast for Germany (DE_LU), walk-forward test on 2025",
+  "final_model": "lightgbm_cf",
+  "final_model_description": "LightGBM trained to predict capacity factor (generation divided by installed wind capacity) and then scaled back to MW; 'CF' in the model name means capacity factor, not calendar features",
+  "test_hours": 8735,
+  "test_period": "2025-01-01 to 2025-12-30",
+  "n_weather_locations": 17,
+  "metrics": {
+    "seasonal_naive_168h": {
+      "MAE_MW": 11492.0,
+      "RMSE_MW": 14526.7,
+      "wMAPE_pct": 75.7,
+      "bias_MW": -175.5
+    },
+    "naive_48h": {
+      "MAE_MW": 9399.8,
+      "RMSE_MW": 12107.0,
+      "wMAPE_pct": 61.9,
+      "bias_MW": 5.4
+    },
+    "ridge": {
+      "MAE_MW": 2372.0,
+      "RMSE_MW": 3064.4,
+      "wMAPE_pct": 15.6,
+      "bias_MW": -990.4
+    },
+    "random_forest": {
+      "MAE_MW": 1922.9,
+      "RMSE_MW": 2584.5,
+      "wMAPE_pct": 12.7,
+      "bias_MW": -1198.0
+    },
+    "lightgbm": {
+      "MAE_MW": 1855.1,
+      "RMSE_MW": 2493.0,
+      "wMAPE_pct": 12.2,
+      "bias_MW": -1168.5
+    },
+    "xgboost": {
+      "MAE_MW": 1870.4,
+      "RMSE_MW": 2521.0,
+      "wMAPE_pct": 12.3,
+      "bias_MW": -1173.0
+    },
+    "lightgbm_cf": {
+      "MAE_MW": 1533.2,
+      "RMSE_MW": 2094.1,
+      "wMAPE_pct": 10.1,
+      "bias_MW": -283.7
+    },
+    "xgboost_cf": {
+      "MAE_MW": 1543.3,
+      "RMSE_MW": 2103.7,
+      "wMAPE_pct": 10.2,
+      "bias_MW": -257.1
+    },
+    "entsoe": {
+      "MAE_MW": 1371.5,
+      "RMSE_MW": 1884.4,
+      "wMAPE_pct": 9.0,
+      "bias_MW": -180.1
+    }
+  },
+  "relative": {
+    "final_mae_vs_entsoe_pct_higher": 11.8,
+    "final_mae_reduction_vs_naive_48h_pct": 83.7
+  },
+  "months_final_beats_entsoe": [
+    "2025-01",
+    "2025-02"
+  ],
+  "months_total": 12,
+  "regimes": [
+    {
+      "regime": "<4 m/s",
+      "hours": 870,
+      "model_MAE_MW": 687.0,
+      "entsoe_MAE_MW": 547.0,
+      "model_vs_entsoe_pct": 25.6,
+      "verdict": "model worse"
+    },
+    {
+      "regime": "4-7 m/s",
+      "hours": 4202,
+      "model_MAE_MW": 1301.0,
+      "entsoe_MAE_MW": 1088.0,
+      "model_vs_entsoe_pct": 19.6,
+      "verdict": "model worse"
+    },
+    {
+      "regime": "7-10 m/s",
+      "hours": 2850,
+      "model_MAE_MW": 1907.0,
+      "entsoe_MAE_MW": 1760.0,
+      "model_vs_entsoe_pct": 8.4,
+      "verdict": "model worse"
+    },
+    {
+      "regime": "10-13 m/s",
+      "hours": 680,
+      "model_MAE_MW": 2153.0,
+      "entsoe_MAE_MW": 2209.0,
+      "model_vs_entsoe_pct": -2.5,
+      "verdict": "roughly equal"
+    },
+    {
+      "regime": ">13 m/s",
+      "hours": 133,
+      "model_MAE_MW": 3233.0,
+      "entsoe_MAE_MW": 3100.0,
+      "model_vs_entsoe_pct": 4.3,
+      "verdict": "model worse (small sample, inconclusive)"
+    }
+  ],
+  "ramps": {
+    "model_MAE_ramp_hours_MW": 2232,
+    "entsoe_MAE_ramp_hours_MW": 2266,
+    "model_MAE_other_hours_MW": 1496,
+    "entsoe_MAE_other_hours_MW": 1324
+  },
+  "negative_price_hours": {
+    "hours_with_negative_price": 576,
+    "model_bias_negative_price_MW": 1639,
+    "entsoe_bias_negative_price_MW": 1962,
+    "model_bias_other_hours_MW": -419,
+    "entsoe_bias_other_hours_MW": -331,
+    "model_bias_closer_to_zero_than_entsoe_in_negative_price_hours": true,
+    "model_bias_closer_to_zero_than_entsoe_in_other_hours": false
+  },
+  "reading_guide": [
+    "bias_MW is forecast minus actual: positive means over-forecast, negative means under-forecast; a bias further from zero is worse.",
+    "Absolute MAE is naturally larger in strong wind. To judge a wind regime, use model_vs_entsoe_pct (positive means the model is worse than ENTSO-E there), never the size of the MAE alone.",
+    "Use the precomputed comparison flags and percentages; do not compare signed numbers yourself.",
+    "Do not state causes that are not in the facts. A link between negative prices and over-forecasting is consistent with curtailment but is unproven; 'non-ramp hours' do not mean stable wind.",
+    "final_mae_vs_entsoe_pct_higher is measured against ENTSO-E's MAE: say that the model's MAE is that percent higher than ENTSO-E's. Never say ENTSO-E is that percent lower, because that is a different number.",
+    "For each wind regime, use the given 'verdict' exactly; do not call a gap better or worse than its verdict, and call a regime a small sample only if its verdict says so.",
+    "'CF' in the model name means capacity factor. Describe the model using final_model_description."
+  ],
+  "data_quality": {
+    "rows": 26279,
+    "period": "2023-01-01 to 2025-12-30",
+    "rows_imputed_short_gaps": 5,
+    "missing_target_hours": 0,
+    "notes": [
+      "3 single-hour ENTSO-E forecast dips at clock-change hours were treated as artifacts and removed",
+      "bias_MW is forecast minus actual; negative means under-forecasting"
+    ]
+  },
+  "limitations": [
+    "Weather inputs are reanalysis (what actually happened), not archived forecasts, so real day-ahead performance would be worse",
+    "Installed-capacity timing was assumed known at the start of each year; the capacity-factor idea was found by studying the 2025 test year",
+    "One test year, single run per model, no significance tests",
+    "ENTSO-E remains more accurate overall; this model does not beat it"
+  ]
+}
